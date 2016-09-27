@@ -25,7 +25,12 @@
         </activity>
         <activity android:name=".Now_playing" />
         <activity android:name=".coming_soon" />
-        <activity android:name=".Searching"></activity>
+        <activity android:name=".Searching"
+
+            android:theme="@style/Theme.AppCompat.NoActionBar">
+
+
+        </activity>
     </application>
 
 </manifest>

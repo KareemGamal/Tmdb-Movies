@@ -118,8 +118,8 @@ public class movie_detail extends AppCompatActivity {
                     JSONObject index=genres.getJSONObject(i);
 
 
-                }
 
+                }
 
 
 
