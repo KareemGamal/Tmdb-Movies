@@ -78,6 +78,8 @@ new Tmdb().execute("http://api.themoviedb.org/3/search/movie?query="+modified_na
                 JSONObject parent=new JSONObject(Json);
                 JSONArray Movies=parent.getJSONArray("results");
 
+
+
                 List<MoviesList> list= new ArrayList<>();
                 for(int i = 0 ; i< Movies.length() ; i++)
                 {
@@ -166,11 +168,7 @@ new Tmdb().execute("http://api.themoviedb.org/3/search/movie?query="+modified_na
 
 
             name.setText(movielist.get(position).getName());
-//            id.setText(movielist.get(position).getId());
 
-
-
-//            pb = (ProgressBar) v2.findViewById(R.id.progressBar);
 
             // Then later, when you want to display image
             ImageLoader.getInstance().displayImage(movielist.get(position).getImage(), image, new ImageLoadingListener() {

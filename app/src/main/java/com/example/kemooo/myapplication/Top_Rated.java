@@ -19,7 +19,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,12 +43,18 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
-    int counter =2;
-    ProgressBar pb;
+
     String imgUrl="http://image.tmdb.org/t/p/w500";
+    Myadapter myadapter2;
+    GridView gv;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,14 +64,34 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
         // Create default options which will be used for every
         //  displayImage(...) call if no options will be passed to this method
         DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder().cacheInMemory(true).cacheOnDisk(true).build();
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext()).defaultDisplayImageOptions(defaultOptions).build();
+        final ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext()).defaultDisplayImageOptions(defaultOptions).build();
         ImageLoader.getInstance().init(config);
         // Do it on Application start
         Toast.makeText(getApplicationContext(), "Here Is The List of Top Rated Films", Toast.LENGTH_SHORT).show();
 
+///////////////////// initialize spinner with desired No.pages
+        Integer [] page_num= new Integer[267];
+        for(int i = 1 ; i<=page_num.length ; i++)
+        {
+            page_num [i-1]=i;
+        }
 
+        ArrayAdapter<Integer> adapter = new ArrayAdapter<Integer>(this ,android.R.layout.simple_spinner_item , page_num );
+        final Spinner sp = (Spinner)findViewById(R.id.spinner);
+        sp.setAdapter(adapter);
+        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+              int pos=  sp.getSelectedItemPosition() + 1;
+             new Tmdb().execute("http://api.themoviedb.org/3/movie/top_rated?api_key=36238a089d7b9497ccba2af9e2b8cc06&page="+pos);
+            }
 
-            new Tmdb().execute("http://api.themoviedb.org/3/movie/top_rated?api_key=36238a089d7b9497ccba2af9e2b8cc06");
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+///////////////////////////////////////////////////////////////////
 
 
     }
@@ -84,9 +112,13 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
     }
     @Override
     public boolean onQueryTextSubmit(String query) {
-        Intent i = new Intent(Top_Rated.this, Searching.class);
-        i.putExtra("Movie",query);
-        startActivity(i);
+        if (!(validate_searchbox(query))) {
+            Toast.makeText(this, "please Enter only alphabets with/without spaces !!", Toast.LENGTH_SHORT).show();
+        } else {
+            Intent i = new Intent(Top_Rated.this, Searching.class);
+            i.putExtra("Movie", query);
+            startActivity(i);
+        }
         return false;
     }
     @Override
@@ -113,7 +145,7 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
                 connection.connect();
 
                 InputStream is=connection.getInputStream();
-               reader=new BufferedReader(new InputStreamReader(is));
+                reader=new BufferedReader(new InputStreamReader(is));
                 StringBuffer buffer =new StringBuffer();
                 String line="";
                 while((line=reader.readLine()) != null){
@@ -162,150 +194,26 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
         @Override
         protected void onPostExecute(List<MoviesList> moviesLists) {
             super.onPostExecute(moviesLists);
-            final Myadapter myadapter2= new Myadapter(getApplicationContext(), R.layout.movie, moviesLists);
-            final GridView gv= (GridView) findViewById(R.id.gridview);
+            myadapter2 = new Myadapter(Top_Rated.this, R.layout.movie, moviesLists);
+            gv = (GridView) findViewById(R.id.gridview);
             gv.setAdapter(myadapter2);
-            myadapter2.notifyDataSetChanged();
 
-        int i;
+            gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(Top_Rated.this, "Loading please wait...", Toast.LENGTH_SHORT).show();
 
-       gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-           @Override
-           public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-               Toast.makeText(Top_Rated.this, "Loading please wait...", Toast.LENGTH_SHORT).show();
-
-               TextView name = (TextView) view.findViewById(R.id.m);
-               TextView iden = (TextView) view.findViewById(R.id.id);
-               Intent i = new Intent(Top_Rated.this, movie_detail.class);
-               i.putExtra("Name", name.getText().toString());
-               i.putExtra("id", iden.getText().toString());
-               startActivity(i);
-           }
-       });
-
-
-       gv.setOnScrollListener(new AbsListView.OnScrollListener() {
-
-           @Override
-           public void onScrollStateChanged(AbsListView view, int scrollState) { // TODO Auto-generated method stub
-               int threshold = 1;
-               int count = gv.getCount();
-
-
-               if (scrollState == SCROLL_STATE_IDLE) {
-                   if (gv.getLastVisiblePosition() >= count - threshold) {
-                       // Execute LoadMoreDataTask AsyncTask
-
-                       if (counter < 267) {
-                           Toast.makeText(Top_Rated.this, "المفروض يظهرلك افلام زيادة اتقل ع الرز", Toast.LENGTH_SHORT).show();
-                           new Tmdb().execute("http://api.themoviedb.org/3/movie/top_rated?api_key=36238a089d7b9497ccba2af9e2b8cc06&page=" + counter);
-                           counter++;
-                       } else {
-                           Toast.makeText(Top_Rated.this, "بس كدا يامعلم جبرت ", Toast.LENGTH_SHORT).show();
-                       }
-
-
-                   }
-               }
-           }
-
-           @Override
-           public void onScroll(AbsListView view, int firstVisibleItem,
-                                int visibleItemCount, int totalItemCount) {
-               // TODO Auto-generated method stub
-
-           }
-
-       });
+                    TextView name = (TextView) view.findViewById(R.id.m);
+                    TextView iden = (TextView) view.findViewById(R.id.id);
+                    Intent i = new Intent(Top_Rated.this, movie_detail.class);
+                    i.putExtra("Name", name.getText().toString());
+                    i.putExtra("id", iden.getText().toString());
+                    startActivity(i);
+                }
+            });
 
         }
     }
-
-
-
-//    public class Tmdb2 extends AsyncTask<String , String , List<MoviesList>  >{
-//
-//        URL url;
-//        HttpURLConnection connection;
-//        BufferedReader reader;
-//
-//
-//        @Override
-//        protected List<MoviesList> doInBackground(String... params) {
-//
-//            try {
-//                url = new URL(params[0]);
-//                connection=(HttpURLConnection)url.openConnection();
-//                connection.connect();
-//
-//                InputStream is=connection.getInputStream();
-//                reader=new BufferedReader(new InputStreamReader(is));
-//                StringBuffer buffer =new StringBuffer();
-//                String line="";
-//                while((line=reader.readLine()) != null){
-//
-//                    buffer.append(line);
-//                }
-//
-//                String Json= buffer.toString();
-//                JSONObject parent=new JSONObject(Json);
-//                JSONArray Movies=parent.getJSONArray("results");
-//
-//                List<MoviesList> list= new ArrayList<>();
-//                for(int i = 0 ; i< Movies.length() ; i++)
-//                {
-//                    JSONObject indexes = Movies.getJSONObject(i);
-//                    MoviesList mi = new MoviesList();
-//                    mi.setName(indexes.getString("title"));
-//                    mi.setImage(imgUrl+indexes.getString("poster_path"));
-//                    mi.setId(indexes.getString("id"));
-//
-//                    list.add(mi);
-//                }
-//
-//                return  list;
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            } finally {
-//                if (connection != null) {
-//                    connection.disconnect();
-//                }
-//                try {
-//                    if (reader != null) {
-//                        reader.close();
-//                    }
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            return null;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(List<MoviesList> moviesLists) {
-//            super.onPostExecute(moviesLists);
-//
-//             Myadapter myadapter2= new Myadapter(getApplicationContext(), R.layout.movie, moviesLists);
-//             GridView gv= (GridView) findViewById(R.id.gridview);
-//             int position=gv.getLastVisiblePosition();
-//             gv.setAdapter(myadapter2);
-//
-//
-//
-//        }
-//    }
-
-
-
-
-
-
-
-
 
 
     public class Myadapter extends ArrayAdapter {
@@ -367,6 +275,23 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
             return v2;
         }
     }
+
+
+
+
+    public boolean validate_searchbox(String query) {
+        String search = "^[\\p{L}\\d ]+(?:\\s[\\p{L}\\d ]+)*$";
+        Pattern pattern = Pattern.compile(search);
+        Matcher matcher = pattern.matcher(query);
+        if (matcher.matches()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+
 
 
 

@@ -18,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +40,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Now_playing extends AppCompatActivity implements SearchView.OnQueryTextListener{
     ProgressBar pb;
@@ -57,7 +60,30 @@ public class Now_playing extends AppCompatActivity implements SearchView.OnQuery
         // Do it on Application start
         Toast.makeText(getApplicationContext(), "Here Is The List of Now Playing Films", Toast.LENGTH_SHORT).show();
 
-        new Tmdb().execute("http://api.themoviedb.org/3/movie/now_playing?api_key=36238a089d7b9497ccba2af9e2b8cc06");
+
+///////////////////// initialize spinner with desired No.pages
+        Integer [] page_num= new Integer[47];
+        for(int i = 1 ; i<=page_num.length ; i++)
+        {
+            page_num [i-1]=i;
+        }
+
+        ArrayAdapter<Integer> adapter = new ArrayAdapter<Integer>(this ,android.R.layout.simple_spinner_item , page_num );
+        final Spinner sp = (Spinner)findViewById(R.id.spinner3);
+        sp.setAdapter(adapter);
+        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                int pos=  sp.getSelectedItemPosition() + 1;
+                new Tmdb().execute("http://api.themoviedb.org/3/movie/now_playing?api_key=36238a089d7b9497ccba2af9e2b8cc06&page="+pos);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+ /////////////////////////////////////////////////////////////
     }
 
     @Override
@@ -76,9 +102,13 @@ public class Now_playing extends AppCompatActivity implements SearchView.OnQuery
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        Intent i = new Intent(Now_playing.this, Searching.class);
-        i.putExtra("Movie",query);
-        startActivity(i);
+        if (!(validate_searchbox(query))) {
+            Toast.makeText(this, "please Enter only alphabets with/without spaces !!", Toast.LENGTH_SHORT).show();
+        } else {
+            Intent i = new Intent(Now_playing.this, Searching.class);
+            i.putExtra("Movie", query);
+            startActivity(i);
+        }
         return false;
     }
     @Override
@@ -234,6 +264,18 @@ public class Now_playing extends AppCompatActivity implements SearchView.OnQuery
             // Default options will be used
 
             return v2;
+        }
+    }
+
+
+    public boolean validate_searchbox(String query) {
+        String search = "^[\\p{L}\\d ]+(?:\\s[\\p{L}\\d ]+)*$";
+        Pattern pattern = Pattern.compile(search);
+        Matcher matcher = pattern.matcher(query);
+        if (matcher.matches()) {
+            return true;
+        } else {
+            return false;
         }
     }
 }
