@@ -3,6 +3,7 @@ package com.example.kemooo.myapplication;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.view.MenuItemCompat;
@@ -49,11 +50,11 @@ import java.util.regex.Pattern;
 public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
 
-    String imgUrl="http://image.tmdb.org/t/p/w500";
+    String imgUrl = "http://image.tmdb.org/t/p/w500";
     Myadapter myadapter2;
     GridView gv;
 
-
+    String Rotten_id;
 
 
     @Override
@@ -70,20 +71,19 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
         Toast.makeText(getApplicationContext(), "Here Is The List of Top Rated Films", Toast.LENGTH_SHORT).show();
 
 ///////////////////// initialize spinner with desired No.pages
-        Integer [] page_num= new Integer[267];
-        for(int i = 1 ; i<=page_num.length ; i++)
-        {
-            page_num [i-1]=i;
+        Integer[] page_num = new Integer[267];
+        for (int i = 1; i <= page_num.length; i++) {
+            page_num[i - 1] = i;
         }
 
-        ArrayAdapter<Integer> adapter = new ArrayAdapter<Integer>(this ,android.R.layout.simple_spinner_item , page_num );
-        final Spinner sp = (Spinner)findViewById(R.id.spinner);
+        ArrayAdapter<Integer> adapter = new ArrayAdapter<Integer>(this, android.R.layout.simple_spinner_item, page_num);
+        final Spinner sp = (Spinner) findViewById(R.id.spinner);
         sp.setAdapter(adapter);
         sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-              int pos=  sp.getSelectedItemPosition() + 1;
-             new Tmdb().execute("http://api.themoviedb.org/3/movie/top_rated?api_key=36238a089d7b9497ccba2af9e2b8cc06&page="+pos);
+                int pos = sp.getSelectedItemPosition() + 1;
+                new Tmdb().execute("http://api.themoviedb.org/3/movie/top_rated?api_key=36238a089d7b9497ccba2af9e2b8cc06&page=" + pos);
             }
 
             @Override
@@ -110,6 +110,7 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
 
         return true;
     }
+
     @Override
     public boolean onQueryTextSubmit(String query) {
         if (!(validate_searchbox(query))) {
@@ -121,6 +122,7 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
         }
         return false;
     }
+
     @Override
     public boolean onQueryTextChange(String newText) {
         return false;
@@ -128,8 +130,7 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
 ////////////////////////////////////////////////////////////////////////////
 
 
-
-    public class Tmdb extends AsyncTask<String , String , List<MoviesList>  >{
+    public class Tmdb extends AsyncTask<String, String, List<MoviesList>> {
 
         URL url;
         HttpURLConnection connection;
@@ -141,35 +142,34 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
 
             try {
                 url = new URL(params[0]);
-                connection=(HttpURLConnection)url.openConnection();
+                connection = (HttpURLConnection) url.openConnection();
                 connection.connect();
 
-                InputStream is=connection.getInputStream();
-                reader=new BufferedReader(new InputStreamReader(is));
-                StringBuffer buffer =new StringBuffer();
-                String line="";
-                while((line=reader.readLine()) != null){
+                InputStream is = connection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is));
+                StringBuffer buffer = new StringBuffer();
+                String line = "";
+                while ((line = reader.readLine()) != null) {
 
                     buffer.append(line);
                 }
 
-                String Json= buffer.toString();
-                JSONObject parent=new JSONObject(Json);
-                JSONArray Movies=parent.getJSONArray("results");
+                String Json = buffer.toString();
+                JSONObject parent = new JSONObject(Json);
+                JSONArray Movies = parent.getJSONArray("results");
 
-                List<MoviesList> list= new ArrayList<>();
-                for(int i = 0 ; i< Movies.length() ; i++)
-                {
-                  JSONObject indexes = Movies.getJSONObject(i);
+                List<MoviesList> list = new ArrayList<>();
+                for (int i = 0; i < Movies.length(); i++) {
+                    JSONObject indexes = Movies.getJSONObject(i);
                     MoviesList mi = new MoviesList();
                     mi.setName(indexes.getString("title"));
-                    mi.setImage(imgUrl+indexes.getString("poster_path"));
+                    mi.setImage(imgUrl + indexes.getString("poster_path"));
                     mi.setId(indexes.getString("id"));
 
-                     list.add(mi);
+                    list.add(mi);
                 }
 
-             return  list;
+                return list;
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -201,18 +201,90 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
             gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(Top_Rated.this, "Loading please wait...", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(Top_Rated.this, "Loading please wait...", Toast.LENGTH_SHORT).show();
+
 
                     TextView name = (TextView) view.findViewById(R.id.m);
                     TextView iden = (TextView) view.findViewById(R.id.id);
+                    String rot_name = validateMoviename(name.getText().toString());
+                    new Rotten().execute("http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey=7ue5rxaj9xn4mhbmsuexug54&q=" +rot_name+"&page_limit=1");
+                    Toast.makeText(Top_Rated.this, ""+ Rotten_id, Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(Top_Rated.this,  Rotten_id+ " " +rot_name, Toast.LENGTH_SHORT).show();
                     Intent i = new Intent(Top_Rated.this, movie_detail.class);
                     i.putExtra("Name", name.getText().toString());
                     i.putExtra("id", iden.getText().toString());
+                    i.putExtra("Rottenid", Rotten_id);
                     startActivity(i);
                 }
             });
 
         }
+    }
+
+
+    public class Rotten extends AsyncTask<String, String, String> {
+
+        URL url;
+        HttpURLConnection connection;
+        BufferedReader reader;
+
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            try {
+                url = new URL(params[0]);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+
+                InputStream is = connection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is));
+                StringBuffer buffer = new StringBuffer();
+                String line = "";
+                while ((line = reader.readLine()) != null) {
+
+                    buffer.append(line);
+                }
+
+                String Json = buffer.toString();
+                JSONObject parent = new JSONObject(Json);
+                JSONArray results = parent.getJSONArray("movies");
+                JSONObject index = results.getJSONObject(0);
+
+                Rotten_id = index.getString("id");
+
+
+                return  Rotten_id;
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+
+
+            Rotten_id=s;
+        }
+
     }
 
 
@@ -236,8 +308,8 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
             View v2 = inflater.inflate(R.layout.movie, null);
 
 
-            TextView name= (TextView)v2.findViewById(R.id.m);
-            TextView id= (TextView)v2. findViewById(R.id.id);
+            TextView name = (TextView) v2.findViewById(R.id.m);
+            TextView id = (TextView) v2.findViewById(R.id.id);
 
             id.setText(movielist.get(position).getId());
             ImageView image = (ImageView) v2.findViewById(R.id.main_img);
@@ -245,8 +317,6 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
 
             name.setText(movielist.get(position).getName());
             id.setText(movielist.get(position).getId());
-
-
 
 
             // Then later, when you want to display image
@@ -277,8 +347,6 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
     }
 
 
-
-
     public boolean validate_searchbox(String query) {
         String search = "^[\\p{L}\\d ]+(?:\\s[\\p{L}\\d ]+)*$";
         Pattern pattern = Pattern.compile(search);
@@ -291,9 +359,18 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
     }
 
 
+    public String validateMoviename(String name) {
+        for (int i = 0; i < name.length(); i++) {
+            char c = name.charAt(i);
+            if (c == ' ') {
+                c = '+';
+                name = name.substring(0, i) + c + name.substring(i + 1, name.length()); //URL must be as http://www.omdbapi.com/?t=now+you+see+me+&y=&plot=short&r=json (" " not used, we use +)
+            }
 
+        }
 
-
+        return name;
+    }
 
 
 
