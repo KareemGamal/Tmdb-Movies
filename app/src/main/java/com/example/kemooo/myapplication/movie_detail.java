@@ -61,7 +61,7 @@ public class movie_detail extends AppCompatActivity {
         final String id = i.getExtras().getString("id");
         String modified_Name=validateMoviename(name);
 
-        ImageButton trail= (ImageButton) findViewById(R.id.Trailer);
+        Button trail= (Button) findViewById(R.id.Trailer);
         trail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -148,25 +148,25 @@ public class movie_detail extends AppCompatActivity {
             super.onPostExecute(s);
 
             TextView mn= (TextView)findViewById(R.id.mName);
-            mn.setText(Moviename);
+            mn.setText("  "+Moviename);
 
             TextView Year= (TextView)findViewById(R.id.mYear);
-            Year.setText("Release Year: "+ year);
+            Year.setText("  "+year+"                                                           "+ runtime);
 
-            TextView Runtime= (TextView)findViewById(R.id.mRuntime);
-            Runtime.setText("Runtime: "+runtime + " Min");
+//            TextView Runtime= (TextView)findViewById(R.id.mRuntime);
+//            Runtime.setText("Runtime: "+runtime + " Min");
 //
             TextView Story= (TextView)findViewById(R.id.s);
-            Story.setText("Story" + story);
+            Story.setText(story);
 //
-            TextView Budget= (TextView)findViewById(R.id.c);
-            Budget.setText(budget + " $");
+            TextView Budget= (TextView)findViewById(R.id.mRevenue);
+            Budget.setText(budget + " $                                         "+revenue + " $");
 
             TextView genres = (TextView)findViewById(R.id.g);
-            genres.setText(genre+"   ");
+            genres.setText("  "+genre+"   ");
 //
-            TextView Revenue= (TextView)findViewById(R.id.r);
-            Revenue.setText(revenue + " $");
+//            TextView Revenue= (TextView)findViewById(R.id.r);
+//            Revenue.setText(revenue + " $");
 
 //
             RatingBar rb= (RatingBar)findViewById(R.id.ratingBar3);
@@ -204,7 +204,7 @@ public class movie_detail extends AppCompatActivity {
         }
 
 
-        }
+    }
 
 
 
@@ -236,10 +236,10 @@ public class movie_detail extends AppCompatActivity {
                 JSONObject parent = new JSONObject(Json);
                 JSONArray results=parent.getJSONArray("results");
 
-                  JSONObject indexes=results.getJSONObject(0);
+                JSONObject indexes=results.getJSONObject(0);
                 youtube_Key=indexes.getString("key");
 
-                
+
             } catch (IOException e) {
                 e.printStackTrace();
 
@@ -271,7 +271,7 @@ public class movie_detail extends AppCompatActivity {
             startActivity(intent);
         }
 
-        }
+    }
 
 
 
@@ -293,5 +293,5 @@ public class movie_detail extends AppCompatActivity {
 
         return name;
     }
-    }
+}
 
