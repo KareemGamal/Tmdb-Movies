@@ -1,47 +1,45 @@
 package com.example.kemooo.myapplication;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.GridView;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.RatingBar;
-import android.widget.TextView;
-import android.widget.Toast;
+        import android.graphics.Bitmap;
+        import android.net.Uri;
+        import android.os.AsyncTask;
+        import android.support.v7.app.AppCompatActivity;
+        import android.os.Bundle;
+        import android.view.View;
+        import android.widget.AdapterView;
+        import android.widget.Button;
+        import android.widget.GridView;
+        import android.widget.ImageButton;
+        import android.widget.ImageView;
+        import android.widget.RatingBar;
+        import android.widget.TextView;
+        import android.widget.Toast;
 
-import com.androidquery.AQuery;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.assist.FailReason;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+        import com.androidquery.AQuery;
+        import com.nostra13.universalimageloader.core.DisplayImageOptions;
+        import com.nostra13.universalimageloader.core.ImageLoader;
+        import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+        import com.nostra13.universalimageloader.core.assist.FailReason;
+        import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+        import org.json.JSONArray;
+        import org.json.JSONException;
+        import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+        import java.io.BufferedReader;
+        import java.io.IOException;
+        import java.io.InputStream;
+        import java.io.InputStreamReader;
+        import java.net.HttpURLConnection;
+        import java.net.URL;
+        import java.util.ArrayList;
+        import java.util.List;
 
-public class movie_detail extends ActionBarActivity {
+public class movie_detail extends AppCompatActivity {
     String imgUrl="http://image.tmdb.org/t/p/w500";
     String img2,Moviename , year , budget , revenue , story , genre , runtime , posterr , imdbrate , metascore , youtube_Key;
-    String Character,inFilm;
+    String Character , inFilm;
     float rate;
     AQuery query , query2;
 
@@ -62,12 +60,10 @@ public class movie_detail extends ActionBarActivity {
         Intent i = getIntent();
         String name= i.getExtras().getString("Name");
         final String id = i.getExtras().getString("id");
-        String rot_id=i.getExtras().getString("Rottenid");
+//        String rot_id=i.getExtras().getString("Rottenid");
         String modified_Name=validateMoviename(name);
 
-
-
-        ImageButton trail= (ImageButton) findViewById(R.id.Trailer);
+        Button trail= (Button) findViewById(R.id.Trailer);
         trail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -80,10 +76,8 @@ public class movie_detail extends ActionBarActivity {
         new Tmdb().execute("http://api.themoviedb.org/3/movie/"+ id +"?api_key=36238a089d7b9497ccba2af9e2b8cc06");
         new moreDetails().execute("http://www.omdbapi.com/?t="+ modified_Name +"&y=&plot=short&r=json");
 
-        new Rotten().execute("http://api.rottentomatoes.com/api/public/v1.0/movies/"+ rot_id +"/cast.json?apikey=7ue5rxaj9xn4mhbmsuexug54");
-
+//        new Rotten().execute("http://api.rottentomatoes.com/api/public/v1.0/movies/"+ rot_id +"/cast.json?apikey=7ue5rxaj9xn4mhbmsuexug54");
     }
-
 
 
     public class Tmdb extends AsyncTask< String , String ,String  > {
@@ -123,6 +117,14 @@ public class movie_detail extends ActionBarActivity {
                 rate=(float)parent.getDouble("vote_average");
                 posterr = parent.getString("poster_path");
 
+                JSONArray genres= parent.getJSONArray("genres");
+                for(int i = 0 ;  i < genres.length(); i++)
+                {
+                    JSONObject index=genres.getJSONObject(i);
+
+
+
+                }
 
 
 
@@ -151,28 +153,30 @@ public class movie_detail extends ActionBarActivity {
             super.onPostExecute(s);
 
             TextView mn= (TextView)findViewById(R.id.mName);
-            mn.setText(Moviename);
+            mn.setText("  "+Moviename);
 
             TextView Year= (TextView)findViewById(R.id.mYear);
-            Year.setText("Release Year: "+ year);
+            Year.setText("  "+year);
 
             TextView Runtime= (TextView)findViewById(R.id.mRuntime);
-            Runtime.setText("Runtime: "+runtime + " Min");
+            Runtime.setText(" "+runtime + " Min   ");
 //
             TextView Story= (TextView)findViewById(R.id.s);
-            Story.setText("Story" + story);
+            Story.setText(story);
 //
-            TextView Budget= (TextView)findViewById(R.id.c);
-            Budget.setText(budget + " $");
+
+            TextView Budget= (TextView)findViewById(R.id.mCost);
+            Budget.setText("  "+budget + " $");
+
+            TextView genres = (TextView)findViewById(R.id.g);
+            genres.setText("  "+genre+"   ");
+//
+            TextView Revenue= (TextView)findViewById(R.id.mRevenue);
+            Revenue.setText(revenue + " $    ");
 
 
-//
-            TextView Revenue= (TextView)findViewById(R.id.r);
-            Revenue.setText(revenue + " $");
-
-//
-            RatingBar rb= (RatingBar)findViewById(R.id.ratingBar3);
-            rb.setRating(rate/2);
+            TextView rb= (TextView) findViewById(R.id.T);
+            rb.setText(""+rate);
 //
             ImageView dropback= (ImageView)findViewById(R.id.dropback);
             query.id(R.id.dropback).image(imgUrl+img2);
@@ -206,7 +210,7 @@ public class movie_detail extends ActionBarActivity {
         }
 
 
-        }
+    }
 
 
 
@@ -342,11 +346,11 @@ public class movie_detail extends ActionBarActivity {
             TextView genres = (TextView)findViewById(R.id.g);
             genres.setText(genre);
 
-            TextView imdb = (TextView)findViewById(R.id.imdb);
-            imdb.setText("imdb: "+imdbrate + "\n");
+            TextView imdb = (TextView)findViewById(R.id.I);
+            imdb.setText(imdbrate);
 
-            TextView meta = (TextView)findViewById(R.id.metascore);
-            meta.setText("metascore: "+metascore+ "\n");
+            TextView meta = (TextView)findViewById(R.id.M);
+            meta.setText(metascore);
 
         }
 
@@ -385,10 +389,10 @@ public class movie_detail extends ActionBarActivity {
 
 
                     JSONObject index = results.getJSONObject(i);
-                   Character = index.getString("name");
+                    Character = index.getString("name");
 
                     JSONArray in_film= index.getJSONArray("characters");
-                   inFilm = in_film.getString(0);
+                    inFilm = in_film.getString(0);
                 }
 
 
@@ -416,15 +420,16 @@ public class movie_detail extends ActionBarActivity {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
 
-            TextView actor= (TextView)findViewById(R.id.act);
+            TextView actor= (TextView)findViewById(R.id.mActor);
             actor.append(Character);
 
-            TextView ch = (TextView)findViewById(R.id.ch);
+            TextView ch = (TextView)findViewById(R.id.mCharacter);
             ch.append(inFilm);
 
         }
 
     }
+
 
 
 
@@ -444,5 +449,7 @@ public class movie_detail extends ActionBarActivity {
 
         return name;
     }
-    }
+}
+
+
 

@@ -53,6 +53,11 @@
                 android:visibility="invisible"
                 android:layout_height="2dp" />
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/Rot_id" />
+
         </LinearLayout>
 
     </android.support.v7.widget.CardView>

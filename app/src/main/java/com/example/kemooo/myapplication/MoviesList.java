@@ -49,6 +49,16 @@ public class MoviesList {
     public String id ;
 
 
+    public String getRotID() {
+        return RotID;
+    }
+
+    public void setRotID(String rotID) {
+        RotID = rotID;
+    }
+
+    public String RotID;
+
 
 
 

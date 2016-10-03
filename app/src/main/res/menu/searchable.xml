@@ -17,11 +17,4 @@
 
         />
 
-    <item
-
-        android:id="@+id/cancel_action"
-        android:orderInCategory="10"
-        android:title="@string/search"
-        app:showAsAction="never"  />
-
 </menu>

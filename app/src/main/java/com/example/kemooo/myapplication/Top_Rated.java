@@ -130,6 +130,7 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
 ////////////////////////////////////////////////////////////////////////////
 
 
+
     public class Tmdb extends AsyncTask<String, String, List<MoviesList>> {
 
         URL url;
@@ -206,20 +207,21 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
 
                     TextView name = (TextView) view.findViewById(R.id.m);
                     TextView iden = (TextView) view.findViewById(R.id.id);
-                    String rot_name = validateMoviename(name.getText().toString());
-                    new Rotten().execute("http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey=7ue5rxaj9xn4mhbmsuexug54&q=" +rot_name+"&page_limit=1");
-                    Toast.makeText(Top_Rated.this, ""+ Rotten_id, Toast.LENGTH_SHORT).show();
-//                    Toast.makeText(Top_Rated.this,  Rotten_id+ " " +rot_name, Toast.LENGTH_SHORT).show();
+//                    TextView in = (TextView) findViewById(R.id.Rot_id);
+//                    String rot_name = validateMoviename(name.getText().toString());
+//                    new Rotten().execute("http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey=7ue5rxaj9xn4mhbmsuexug54&q=" +rot_name+"&page_limit=1");
+//                    Toast.makeText(Top_Rated.this, ""+ in.getText().toString() , Toast.LENGTH_SHORT).show();
                     Intent i = new Intent(Top_Rated.this, movie_detail.class);
                     i.putExtra("Name", name.getText().toString());
                     i.putExtra("id", iden.getText().toString());
-                    i.putExtra("Rottenid", Rotten_id);
+//                    i.putExtra("Rottenid",  in.getText().toString());
                     startActivity(i);
                 }
             });
 
         }
     }
+
 
 
     public class Rotten extends AsyncTask<String, String, String> {
@@ -251,11 +253,14 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
                 JSONArray results = parent.getJSONArray("movies");
                 JSONObject index = results.getJSONObject(0);
 
-                Rotten_id = index.getString("id");
+
+                String i= index.getString("id");
 
 
-                return  Rotten_id;
 
+
+
+return i;
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -282,7 +287,10 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
             super.onPostExecute(s);
 
 
-            Rotten_id=s;
+            TextView id= (TextView)findViewById(R.id.Rot_id);
+            id.setText(s);
+
+
         }
 
     }
@@ -345,6 +353,7 @@ public class Top_Rated extends AppCompatActivity implements SearchView.OnQueryTe
             return v2;
         }
     }
+
 
 
     public boolean validate_searchbox(String query) {
